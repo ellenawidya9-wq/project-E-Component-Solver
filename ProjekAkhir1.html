@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Component Solver</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #e2e8f0;
+            --subtext: #94a3b8;
+            --accent: #38bdf8;
+            --btn: #0284c7;
+            --btn-hover: #0369a1;
+            --border: #334155;
+            --input: #0f172a;
+            --hasil: #0f172a;
+            --success: #4ade80;
+            --error: #f87171;
+        }
+      .light {
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #0f172a;
+            --subtext: #475569;
+            --accent: #0284c7;
+            --btn: #0284c7;
+            --btn-hover: #0369a1;
+            --border: #cbd5e1;
+            --input: #ffffff;
+            --hasil: #f8fafc;
+            --success: #16a34a;
+            --error: #dc2626;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            line-height: 1.6;
+            transition: 0.3s;
+        }
+      .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: var(--card);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: 0.3s;
+        }
+      .header { position: relative; }
+      .theme-toggle {
+            position: absolute;
+            right: 0; top: 0;
+            background: var(--btn);
+            border: none;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        h1, h2 { text-align: center; color: var(--accent); }
+        h1 { margin-bottom: 8px; font-size: 24px; }
+        h2 { margin: 16px 0; font-size: 18px; color: var(--subtext); }
+      .garis { border-top: 2px solid var(--border); margin: 16px 0; }
+      .garis-tipis { border-top: 1px dashed var(--border); margin: 12px 0; }
+      .menu { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
+        button, select, input {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--input);
+            color: var(--text);
+            font-size: 16px;
+            width: 100%;
+        }
+        button {
+            background: var(--btn);
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        button:hover { background: var(--btn-hover); }
+        button.secondary { background: var(--border); }
+      .form-group { margin: 12px 0; }
+        label { display: block; margin-bottom: 6px; color: var(--subtext); }
+      .hasil {
+            background: var(--hasil);
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            border: 1px solid var(--border);
+        }
+      .hasil h3 { color: var(--success); margin-bottom: 10px; text-align: center; }
+      .error { color: var(--error); font-weight: bold; margin-top: 10px; }
+      .pilihan-warna { font-size: 12px; color: var(--subtext); margin-bottom: 8px; }
+      .hidden { display: none; }
+      .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+      .btn-group button { flex: 1; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+    </div>
+
+    <div id="menu-utama">
+        <h1>E-Component Solver</h1>
+        <h2>Resistor & Capacitor Computation Engine</h2>
+        <div class="garis"></div>
+        <div class="menu">
+            <button onclick="showMenu('resistor')">1. Resistor (Kode Warna Gelang)</button>
+            <button onclick="showMenu('kapasitor')">2. Kapasitor (Kode Kapasitor)</button>
+        </div>
+        <div class="garis"></div>
+    </div>
+
+    <!-- MENU RESISTOR -->
+    <div id="menu-resistor" class="hidden">
+        <h1>MENU RESISTOR</h1>
+        <div class="garis"></div>
+        <div class="menu">
+            <button onclick="showResistor(4)">1. Resistor 4 Gelang Warna</button>
+            <button onclick="showResistor(5)">2. Resistor 5 Gelang Warna</button>
+            <button class="secondary" onclick="showMenu('utama')">0. Kembali ke Menu Utama</button>
+        </div>
+        <div class="garis"></div>
+    </div>
+
+    <!-- FORM RESISTOR -->
+    <div id="form-resistor" class="hidden">
+        <h2 id="judul-resistor">RESISTOR 4 GELANG</h2>
+        <div class="garis"></div>
+        <p class="pilihan-warna">Pilihan: hitam, coklat, merah, orange, kuning, hijau, biru, ungu, abuabu, putih, emas, perak</p>
+        <div class="garis-tipis"></div>
+        <div id="input-resistor"></div>
+        <button onclick="hitungResistor()">Hitung</button>
+        <button class="secondary" onclick="showMenu('resistor')">Kembali</button>
+        <div id="hasil-resistor"></div>
+    </div>
+
+    <!-- MENU KAPASITOR -->
+    <div id="menu-kapasitor" class="hidden">
+        <h1>MENU KAPASITOR</h1>
+        <div class="garis"></div>
+        <div class="menu">
+            <button onclick="showKapasitor(1)">1. Kapasitor Keramik</button>
+            <button onclick="showKapasitor(2)">2. Kapasitor Elektrolit (ELCO)</button>
+            <button onclick="showKapasitor(3)">3. Kapasitor Milar</button>
+            <button onclick="showKapasitor(4)">4. Kapasitor Tantalum</button>
+            <button onclick="showKapasitor(5)">5. Kapasitor Mika / Silver Mica</button>
+            <button onclick="showKapasitor(6)">6. Kapasitor Variabel / Trimmer</button>
+            <button class="secondary" onclick="showMenu('utama')">0. Kembali ke Menu Utama</button>
+        </div>
+        <div class="garis"></div>
+    </div>
+
+    <!-- FORM KAPASITOR -->
+    <div id="form-kapasitor" class="hidden">
+        <h2 id="judul-kapasitor">KAPASITOR KERAMIK</h2>
+        <div class="garis"></div>
+        <div id="input-kapasitor"></div>
+        <button onclick="hitungKapasitor()">Hitung</button>
+        <button class="secondary" onclick="showMenu('kapasitor')">Kembali</button>
+        <div id="hasil-kapasitor"></div>
+    </div>
+</div>
+
+<script>
+const { jsPDF } = window.jspdf;
+
+// ==================== THEME ====================
+function toggleTheme() {
+    document.body.classList.toggle('light');
+    const btn = document.getElementById('themeBtn');
+    btn.innerText = document.body.classList.contains('light')? '🌙' : '☀️';
+    localStorage.setItem('theme', document.body.classList.contains('light')? 'light' : 'dark');
+}
+// Load theme
+if (localStorage.getItem('theme') === 'light') {
+    document.body.classList.add('light');
+    document.getElementById('themeBtn').innerText = '🌙';
+}
+
+// ==================== DATA ====================
+const tabelWarna = {
+    "hitam": {angka: 0, pengali: 1, tol4: -1, tol5: -1},
+    "coklat": {angka: 1, pengali: 10, tol4: -1, tol5: 1.0},
+    "merah": {angka: 2, pengali: 100, tol4: -1, tol5: 2.0},
+    "orange": {angka: 3, pengali: 1000, tol4: -1, tol5: -1},
+    "kuning": {angka: 4, pengali: 10000, tol4: -1, tol5: -1},
+    "hijau": {angka: 5, pengali: 100000, tol4: -1, tol5: 0.5},
+    "biru": {angka: 6, pengali: 1e6, tol4: -1, tol5: 0.25},
+    "ungu": {angka: 7, pengali: 1e7, tol4: -1, tol5: 0.1},
+    "abuabu": {angka: 8, pengali: 1e8, tol4: -1, tol5: 0.05},
+    "putih": {angka: 9, pengali: 1e9, tol4: -1, tol5: -1},
+    "emas": {angka: -1, pengali: 0.1, tol4: 5, tol5: 5.0},
+    "perak": {angka: -1, pengali: 0.01, tol4: 10, tol5: 10.0}
+};
+const tabelTantalum = {A:1.0, B:1.5, C:2.2, D:3.3, E:4.7, F:6.8, G:10.0};
+const warnaList = Object.keys(tabelWarna);
+let jenisResistor = 4, jenisKapasitor = 1, lastHasil = '';
+
+// ==================== HELPER ====================
+function hideAll() {
+    document.querySelectorAll('.container > div:not(.header)').forEach(div => div.classList.add('hidden'));
+}
+function showMenu(menu) {
+    hideAll();
+    document.getElementById('menu-' + menu).classList.remove('hidden');
+}
+function buatDropdown(id) {
+    let html = `<select id="${id}">`;
+    warnaList.forEach(w => html += `<option value="${w}">${w}</option>`);
+    return html + `</select>`;
+}
+function formatResistor(nilai) {
+    if (nilai >= 1e9) return (nilai/1e9).toFixed(2) + " GOhm";
+    if (nilai >= 1e6) return (nilai/1e6).toFixed(2) + " MOhm";
+    if (nilai >= 1e3) return (nilai/1e3).toFixed(2) + " kOhm";
+    return nilai.toFixed(2) + " Ohm";
+}
+function formatKapasitor(pF) {
+    let hasil = pF + " pF";
+    if (pF >= 1000) hasil += " = " + (pF/1000).toFixed(2) + " nF";
+    if (pF >= 1e6) hasil += " = " + (pF/1e6).toFixed(2) + " uF";
+    return hasil;
+}
+
+function exportPDF() {
+    if (!lastHasil) return alert('Hitung dulu baru export!');
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("E-Component Solver - Hasil Perhitungan", 20, 20);
+    doc.setFontSize(12);
+    const lines = doc.splitTextToSize(lastHasil, 170);
+    doc.text(lines, 20, 35);
+    doc.save('hasil-komponen.pdf');
+}
+
+// ==================== RESISTOR ====================
+function showResistor(jenis) {
+    jenisResistor = jenis;
+    hideAll();
+    document.getElementById('form-resistor').classList.remove('hidden');
+    document.getElementById('judul-resistor').innerText = `RESISTOR ${jenis} GELANG`;
+    let html = '';
+    for (let i = 1; i <= jenis; i++) {
+        let label = `Gelang ${i}`;
+        if (jenis == 4) {
+            if (i == 1) label += " (digit 1)";
+            if (i == 2) label += " (digit 2)";
+            if (i == 3) label += " (pengali)";
+            if (i == 4) label += " (toleransi)";
+        } else {
+            if (i <= 3) label += ` (digit ${i})`;
+            if (i == 4) label += " (pengali)";
+            if (i == 5) label += " (toleransi)";
+        }
+        html += `<div class="form-group"><label>${label}:</label>${buatDropdown('g'+i)}</div>`;
+    }
+    document.getElementById('input-resistor').innerHTML = html;
+    document.getElementById('hasil-resistor').innerHTML = '';
+}
+
+function hitungResistor() {
+    const g = [];
+    for (let i = 1; i <= jenisResistor; i++) g[i] = document.getElementById('g'+i).value;
+    let error = '', nilai, tol;
+    if (jenisResistor == 4) {
+        if (tabelWarna[g[1]].angka == -1 || tabelWarna[g[2]].angka == -1) error = "Gelang 1 dan 2 tidak boleh emas atau perak!";
+        if (tabelWarna[g[4]].tol4 == -1) error = "Gelang 4 harus: coklat, merah, hijau, biru, ungu, emas, atau perak!";
+        if (!error) {
+            nilai = (tabelWarna[g[1]].angka * 10 + tabelWarna[g[2]].angka) * tabelWarna[g[3]].pengali;
+            tol = tabelWarna[g[4]].tol4;
+        }
+    } else {
+        if (tabelWarna[g[1]].angka==-1 || tabelWarna[g[2]].angka==-1 || tabelWarna[g[3]].angka==-1) error = "Gelang 1, 2, dan 3 tidak boleh emas atau perak!";
+        if (tabelWarna[g[5]].tol5 == -1) error = "Gelang 5 harus: coklat, merah, hijau, biru, ungu, emas, atau perak!";
+        if (!error) {
+            nilai = (tabelWarna[g[1]].angka * 100 + tabelWarna[g[2]].angka * 10 + tabelWarna[g[3]].angka) * tabelWarna[g[4]].pengali;
+            tol = tabelWarna[g[5]].tol5;
+        }
+    }
+    let html = '<div class="hasil"><h3>HASIL</h3>';
+    if (error) {
+        html += `<p class="error">[ERROR] ${error}</p>`;
+        lastHasil = `ERROR: ${error}`;
+    } else {
+        let bawah = nilai * (1 - tol/100);
+        let atas = nilai * (1 + tol/100);
+        let teks = `Nilai: ${formatResistor(nilai)}\nToleransi: +/- ${tol}%\nMin: ${formatResistor(bawah)}\nMax: ${formatResistor(atas)}`;
+        html += `<p>Nilai : ${formatResistor(nilai)}</p>`;
+        html += `<p>Toleransi : +/- ${tol}%</p>`;
+        html += `<p>Min : ${formatResistor(bawah)}</p>`;
+        html += `<p>Max : ${formatResistor(atas)}</p>`;
+        html += `<div class="btn-group"><button onclick="exportPDF()">Download PDF</button></div>`;
+        lastHasil = `Resistor ${jenisResistor} Gelang\n${g.slice(1).join(' - ')}\n\n${teks}`;
+    }
+    html += '</div>';
+    document.getElementById('hasil-resistor').innerHTML = html;
+}
+
+// ==================== KAPASITOR ====================
+function showKapasitor(jenis) {
+    jenisKapasitor = jenis;
+    hideAll();
+    document.getElementById('form-kapasitor').classList.remove('hidden');
+    const judul = ["KAPASITOR KERAMIK","KAPASITOR ELEKTROLIT (ELCO)","KAPASITOR MILAR","KAPASITOR TANTALUM","KAPASITOR MIKA / SILVER MICA","KAPASITOR VARIABEL / TRIMMER"];
+    document.getElementById('judul-kapasitor').innerText = judul[jenis-1];
+    let html = '';
+    if (jenis == 1 || jenis == 3) {
+        html = `<div class="form-group"><label>Masukkan kode (3 digit):</label><input type="text" id="kode" maxlength="3" placeholder="104"><p class="pilihan-warna">Contoh: 104 = 10 x 10^4 = 100.000 pF = 100 nF</p></div>`;
+    } else if (jenis == 2) {
+        html = `<div class="form-group"><label>Masukkan nilai kapasitor (uF):</label><input type="number" id="nilai" step="any" placeholder="100"></div>`;
+    } else if (jenis == 4) {
+        html = `<div class="form-group"><label>Masukkan kode huruf (A-G):</label><input type="text" id="kode" maxlength="1" placeholder="A"><p class="pilihan-warna">A=1.0uF B=1.5uF C=2.2uF D=3.3uF E=4.7uF F=6.8uF G=10uF</p></div>`;
+    } else if (jenis == 5) {
+        html = `<div class="form-group"><label>Masukkan nilai (pF):</label><input type="number" id="nilai" step="any" placeholder="100"></div>`;
+    } else if (jenis == 6) {
+        html = `<div class="grid-2"><div class="form-group"><label>Min (pF):</label><input type="number" id="min" step="any"></div><div class="form-group"><label>Max (pF):</label><input type="number" id="max" step="any"></div></div>`;
+    }
+    document.getElementById('input-kapasitor').innerHTML = html;
+    document.getElementById('hasil-kapasitor').innerHTML = '';
+}
+
+function hitungKapasitor() {
+    let html = '<div class="hasil"><h3>HASIL</h3>';
+    let error = '', teks = '';
+    try {
+        if (jenisKapasitor == 1 || jenisKapasitor == 3) {
+            let kode = document.getElementById('kode').value;
+            if (kode.length!= 3 ||!/^\d{3}$/.test(kode)) throw "Kode harus 3 digit angka!";
+            let d1 = parseInt(kode[0]), d2 = parseInt(kode[1]), exp = parseInt(kode[2]);
+            let pF = (d1 * 10 + d2) * Math.pow(10, exp);
+            teks = `Kode: ${kode}\nNilai: ${formatKapasitor(pF)}\nJenis: ${jenisKapasitor==1? 'Keramik' : 'Milar'}`;
+            html += `<p>Kode : ${kode}</p><p>Nilai : ${formatKapasitor(pF)}</p><p>Jenis : ${jenisKapasitor==1? 'Kapasitor Keramik (Non-polar)' : 'Kapasitor Film / Polyester (Non-polar)'}</p>`;
+        } else if (jenisKapasitor == 2) {
+            let nilai = parseFloat(document.getElementById('nilai').value);
+            if (nilai <= 0) throw "Nilai harus lebih dari 0!";
+            let pF = nilai * 1e6;
+            teks = `Nilai: ${nilai} uF = ${nilai*1000} nF = ${pF} pF\nJenis: ELCO`;
+            html += `<p>Nilai : ${nilai} uF = ${nilai*1000} nF = ${pF} pF</p><p>Jenis : Kapasitor Elektrolit / ELCO (Polar)</p>`;
+        } else if (jenisKapasitor == 4) {
+            let kode = document.getElementById('kode').value.toUpperCase();
+            if (!tabelTantalum[kode]) throw "Kode tidak valid! Gunakan A sampai G.";
+            let nilaiUF = tabelTantalum[kode];
+            teks = `Kode: ${kode}\nNilai: ${nilaiUF} uF = ${nilaiUF*1000} nF = ${nilaiUF*1e6} pF\nJenis: Tantalum`;
+            html += `<p>Kode : ${kode}</p><p>Nilai : ${nilaiUF} uF = ${nilaiUF*1000} nF = ${nilaiUF*1e6} pF</p><p>Jenis : Kapasitor Tantalum (Polar, Presisi Tinggi)</p>`;
+        } else if (jenisKapasitor == 5) {
+            let pF = parseFloat(document.getElementById('nilai').value);
+            if (pF <= 0) throw "Nilai harus lebih dari 0!";
+            teks = `Nilai: ${formatKapasitor(pF)}\nJenis: Mika`;
+            html += `<p>Nilai : ${formatKapasitor(pF)}</p><p>Jenis : Kapasitor Mika / Silver Mica (Non-polar, Presisi Sangat Tinggi)</p>`;
+        } else if (jenisKapasitor == 6) {
+            let pFMin = parseFloat(document.getElementById('min').value);
+            let pFMax = parseFloat(document.getElementById('max').value);
+            if (pFMin <= 0 || pFMax <= 0 || pFMin >= pFMax) throw "Nilai tidak valid! Min harus lebih kecil dari Max.";
+            teks = `Range: ${pFMin} pF - ${pFMax} pF\nRange: ${pFMin/1000} nF - ${pFMax/1000} nF\nJenis: Variabel`;
+            html += `<p>Range : ${pFMin} pF sampai ${pFMax} pF</p><p>Range : ${pFMin/1000} nF sampai ${pFMax/1000} nF</p><p>Jenis : Kapasitor Variabel / Trimmer</p>`;
+        }
+    } catch (e) { error = e; }
+
+    if (error) {
+        html += `<p class="error">[ERROR] ${error}</p>`;
+        lastHasil = `ERROR: ${error}`;
+    } else {
+        html += `<div class="btn-group"><button onclick="exportPDF()">Download PDF</button></div>`;
+        lastHasil = `Kapasitor - ${document.getElementById('judul-kapasitor').innerText}\n\n${teks}`;
+    }
+    html += '</div>';
+    document.getElementById('hasil-kapasitor').innerHTML = html;
+}
+
+showMenu('utama');
+</script>
+</body>
+</html>
